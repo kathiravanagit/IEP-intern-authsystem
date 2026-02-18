@@ -88,16 +88,16 @@ export const Register = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute top-96 right-0 w-96 h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
-        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-accent-400 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '4s'}} />
+        <div className="absolute top-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
+        <div className="absolute top-96 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute bottom-0 left-1/2 w-72 h-72 sm:w-96 sm:h-96 bg-accent-400 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '4s'}} />
       </div>
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
-          <nav className="flex gap-6">
+      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
+          <nav className="flex flex-wrap gap-4 sm:gap-6">
             <Link to="/register" className="text-primary-700 hover:text-primary-900 font-medium transition-colors">
               Register
             </Link>
@@ -114,10 +114,10 @@ export const Register = () => {
           {/* Left Column - Form */}
           <div className="animate-fade-in-up">
             <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-sm border border-primary-100 hover-lift">
-              <h2 className="text-4xl lg:text-5xl font-bold text-primary-900 mb-3 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-900 mb-3 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
                 Create your account
               </h2>
-              <p className="text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+              <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
                 Join thousands of secure users. Simple, fast, and protected.
               </p>
 
@@ -214,7 +214,7 @@ export const Register = () => {
           <div className="flex items-center animate-fade-in-up" style={{animationDelay: '0.2s'}}>
             <div className="w-full">
               <div className="bg-white rounded-2xl p-8 lg:p-10 border border-primary-100 shadow-sm hover-lift mb-6">
-                <h3 className="text-3xl font-bold text-primary-900 mb-6">Why join us?</h3>
+                <h3 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-6">Why join us?</h3>
                 <ul className="space-y-5">
                   <li className="flex items-start gap-4 animate-slide-in-left" style={{animationDelay: '0.3s'}}>
                     <span className="text-accent-600 text-2xl flex-shrink-0 mt-1">✓</span>

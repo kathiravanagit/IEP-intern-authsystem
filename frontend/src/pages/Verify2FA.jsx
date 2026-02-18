@@ -45,14 +45,14 @@ export const Verify2FA = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-1/3 left-0 w-96 h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '1s'}} />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '3s'}} />
+        <div className="absolute top-1/3 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '1s'}} />
+        <div className="absolute bottom-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '3s'}} />
       </div>
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
         </div>
       </header>
 
@@ -61,10 +61,10 @@ export const Verify2FA = () => {
         <div className="max-w-md w-full animate-fade-in-up">
           {/* Card */}
           <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-sm border border-primary-100 hover-lift">
-            <h2 className="text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
               Two-Factor Authentication
             </h2>
-            <p className="text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {useBackupCode
                 ? 'Enter one of your backup codes'
                 : 'Enter the code from your authenticator app'}

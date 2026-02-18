@@ -150,14 +150,14 @@ export const Profile = () => {
   return (
     <div className="min-h-screen bg-primary-50 flex flex-col">
       <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
       </div>
 
-      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
-          <div className="flex items-center gap-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <Link
               to="/profile"
               className="text-primary-700 font-medium hover:text-primary-900 transition-colors"
@@ -174,11 +174,11 @@ export const Profile = () => {
         </div>
       </header>
 
-      <main className="relative z-0 flex-1 px-6 py-12">
+      <main className="relative z-0 flex-1 px-4 sm:px-6 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12 animate-fade-in-up">
-            <h2 className="text-4xl font-bold text-primary-900 mb-2">Profile & Security</h2>
-            <p className="text-lg text-primary-600">Manage your account details and security settings</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 mb-2">Profile & Security</h2>
+            <p className="text-base sm:text-lg text-primary-600">Manage your account details and security settings</p>
           </div>
 
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 mb-12 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
@@ -292,7 +292,7 @@ export const Profile = () => {
 
             <div className="space-y-4">
               {!user?.twoFactorEnabled && (
-                <div className="bg-accent-50 border border-accent-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="bg-accent-50 border border-accent-200 rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h4 className="font-semibold text-accent-900">Enable Two-Factor Authentication</h4>
                     <p className="text-sm text-accent-700 mt-1">Add an extra layer of security to your account</p>
@@ -307,7 +307,7 @@ export const Profile = () => {
               )}
 
               {user?.twoFactorEnabled && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h4 className="font-semibold text-green-900">Two-Factor Authentication Enabled</h4>
                     <p className="text-sm text-green-700 mt-1">Your account has maximum security protection</p>

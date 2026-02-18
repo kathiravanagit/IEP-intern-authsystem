@@ -72,14 +72,14 @@ export const Setup2FA = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-1/4 left-0 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-1/4 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
+        <div className="absolute bottom-1/4 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
       </div>
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
         </div>
       </header>
 
@@ -115,10 +115,10 @@ export const Setup2FA = () => {
         <div className="max-w-2xl w-full">
           {/* Card */}
           <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-sm border border-primary-100 hover-lift">
-            <h2 className="text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
               Set Up Two-Factor Authentication
             </h2>
-            <p className="text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               Add an extra layer of security to your account
             </p>
 
@@ -140,7 +140,7 @@ export const Setup2FA = () => {
                   Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
                 </p>
                 <div className="bg-primary-50 p-6 rounded-xl mb-6 inline-block border border-primary-100">
-                  <img src={qrCode} alt="QR Code" className="w-64 h-64" />
+                  <img src={qrCode} alt="QR Code" className="w-56 h-56 sm:w-64 sm:h-64" />
                 </div>
                 
                 <div className="bg-primary-50 p-4 rounded-xl mb-8 border border-primary-100">
@@ -186,7 +186,7 @@ export const Setup2FA = () => {
                 </div>
 
                 <div className="bg-primary-50 p-6 rounded-xl mb-8 border border-primary-100 max-h-80 overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {backupCodes.map((code, index) => (
                       <div key={index} className="font-mono text-sm text-primary-900 bg-white p-3 rounded-lg border border-primary-200">
                         <span className="text-primary-500 mr-2">{index + 1}.</span>{code}

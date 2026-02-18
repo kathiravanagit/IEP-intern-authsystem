@@ -49,14 +49,14 @@ export const ConfirmLogin = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
+        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
       </div>
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary-900 animate-fade-in">{APP_NAME}</h1>
         </div>
       </header>
 
