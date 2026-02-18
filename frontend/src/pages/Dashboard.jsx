@@ -102,11 +102,16 @@ export const Dashboard = () => {
 
     const userAnswer = Number(mathAnswer);
     if (userAnswer === mathQuestion.answer) {
-      setMathFeedback('Correct! Great job.');
-      setMathScore((prev) => prev + 1);
+      setMathScore((prev) => {
+        const nextScore = prev + 1;
+        setMathFeedback(`Correct! Score: ${nextScore}.`);
+        return nextScore;
+      });
     } else {
-      setMathFeedback(`Not quite. Score: 0.`);
-      setMathScore(0);
+      setMathScore((prev) => {
+        setMathFeedback(`Not quite. You scored ${prev}. Resetting to 0.`);
+        return 0;
+      });
     }
 
     setMathAnswer('');
