@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import { Button } from '../components/ui/Button';
@@ -10,9 +10,13 @@ export const ConfirmLogin = () => {
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
   const [requires2FA, setRequires2FA] = useState(false);
+  const isProcessInitiated = useRef(false);
 
   useEffect(() => {
     const confirmLogin = async () => {
+      if (isProcessInitiated.current) return;
+      isProcessInitiated.current = true;
+
       const token = searchParams.get('token');
 
       if (!token) {
@@ -49,8 +53,8 @@ export const ConfirmLogin = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Header */}
@@ -84,7 +88,7 @@ export const ConfirmLogin = () => {
                   {requires2FA ? 'Redirecting to 2FA verification...' : 'Redirecting to dashboard...'}
                 </p>
                 <div className="h-1 bg-primary-100 rounded-full relative overflow-hidden">
-                  <div className="h-full bg-accent-600 rounded-full animate-pulse" style={{width: '100%'}} />
+                  <div className="h-full bg-accent-600 rounded-full animate-pulse" style={{ width: '100%' }} />
                 </div>
               </div>
             )}

@@ -10,7 +10,6 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
-  const [activity, setActivity] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [mathQuestion, setMathQuestion] = useState(() => ({ text: '', answer: 0 }));
   const [mathAnswer, setMathAnswer] = useState('');
@@ -31,15 +30,10 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    const fetchUserAndActivity = async () => {
+    const fetchUser = async () => {
       try {
-        const [userResponse, activityResponse] = await Promise.all([
-          userAPI.getMe(),
-          userAPI.getActivity()
-        ]);
-
-        setUser(userResponse.data.data.user);
-        setActivity(activityResponse.data.data.activity);
+        const response = await userAPI.getMe();
+        setUser(response.data.data.user);
       } catch (error) {
         navigate('/login');
       } finally {
@@ -47,7 +41,7 @@ export const Dashboard = () => {
       }
     };
 
-    fetchUserAndActivity();
+    fetchUser();
   }, [navigate]);
 
   useEffect(() => {
@@ -279,39 +273,6 @@ export const Dashboard = () => {
                 <p className="text-sm text-primary-700">{mathFeedback}</p>
               )}
             </form>
-          </div>
-
-          {/* Recent Security Activity */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div>
-                <h3 className="text-2xl font-bold text-primary-900">Recent Security Activity</h3>
-                <p className="text-primary-600">Review your latest account interactions</p>
-              </div>
-            </div>
-
-            {activity.length > 0 ? (
-              <div className="divide-y divide-primary-100 max-h-96 overflow-y-auto pr-2">
-                {activity.map((log) => (
-                  <div key={log._id || log.timestamp} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-primary-50 px-2 rounded-lg transition-colors">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-primary-900 text-sm">{log.action.replace(/_/g, ' ')}</span>
-                      <span className="text-xs text-primary-500 font-mono mt-1">{log.ip || 'Unknown IP'}</span>
-                    </div>
-                    <div className="text-xs text-primary-600 sm:text-right">
-                      {new Date(log.timestamp).toLocaleString('en-US', {
-                        month: 'short', day: 'numeric',
-                        hour: 'numeric', minute: '2-digit'
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-primary-50 rounded-xl border border-primary-100">
-                <p className="text-primary-600">No recent security activity found.</p>
-              </div>
-            )}
           </div>
 
         </div>

@@ -1,6 +1,5 @@
 import express from 'express';
 import User from '../models/User.js';
-import AuditLog from '../models/AuditLog.js';
 import { authenticate, require2FAComplete } from '../middleware/auth.js';
 import { createAuditLog } from '../services/auditService.js';
 import { validateEmail, validatePassword } from '../utils/validators.js';
@@ -35,28 +34,6 @@ router.get('/me', authenticate, require2FAComplete, async (req, res, next) => {
           twoFactorEnabled: user.twoFactorEnabled,
           createdAt: user.createdAt,
         },
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// =====================================================
-// GET /users/activity - Get recent account activity
-// =====================================================
-router.get('/activity', authenticate, require2FAComplete, async (req, res, next) => {
-  try {
-    const logs = await AuditLog.find({ userId: req.user.id })
-      .sort({ timestamp: -1 })
-      .limit(10)
-      .select('action ip userAgent timestamp metadata')
-      .lean();
-
-    res.status(200).json({
-      success: true,
-      data: {
-        activity: logs,
       },
     });
   } catch (error) {

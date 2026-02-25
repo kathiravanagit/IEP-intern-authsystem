@@ -42,7 +42,6 @@ export const authAPI = {
 export const userAPI = {
   getMe: () => api.get('/users/me'),
   updateMe: (data) => api.put('/users/me', data),
-  getActivity: () => api.get('/users/activity'),
 };
 
 export default api;
