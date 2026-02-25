@@ -32,6 +32,12 @@ export const ResetPassword = () => {
       newErrors.newPassword = 'Password is required';
     } else if (formData.newPassword.length < 8) {
       newErrors.newPassword = 'Password must be at least 8 characters';
+    } else if (!/[A-Z]/.test(formData.newPassword)) {
+      newErrors.newPassword = 'Password must contain at least one uppercase letter';
+    } else if (!/[a-z]/.test(formData.newPassword)) {
+      newErrors.newPassword = 'Password must contain at least one lowercase letter';
+    } else if (!/[0-9]/.test(formData.newPassword)) {
+      newErrors.newPassword = 'Password must contain at least one number';
     }
     if (formData.newPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
@@ -81,8 +87,8 @@ export const ResetPassword = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-1/3 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-1/3 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-1/3 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-1/3 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Header */}
@@ -97,27 +103,26 @@ export const ResetPassword = () => {
         <div className="max-w-md w-full animate-fade-in-up">
           {/* Card */}
           <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-sm border border-primary-100 hover-lift">
-            <h2 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               Reset Password
             </h2>
-            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               Enter the code sent to your email
             </p>
 
             {message.text && (
               <div
-                className={`mb-6 p-4 rounded-lg animate-fade-in ${
-                  message.type === 'success'
+                className={`mb-6 p-4 rounded-lg animate-fade-in ${message.type === 'success'
                     ? 'bg-green-50 text-green-800 border border-green-200'
                     : 'bg-red-50 text-red-800 border border-red-200'
-                }`}
+                  }`}
               >
                 {message.text}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                 <Input
                   type="email"
                   name="email"
@@ -129,7 +134,7 @@ export const ResetPassword = () => {
                 />
               </div>
 
-              <div className="animate-fade-in-up" style={{animationDelay: '0.35s'}}>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.35s' }}>
                 <Input
                   type="text"
                   name="otp"
@@ -142,7 +147,7 @@ export const ResetPassword = () => {
                 />
               </div>
 
-              <div className="animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Input
                   type="password"
                   name="newPassword"
@@ -154,7 +159,7 @@ export const ResetPassword = () => {
                 />
               </div>
 
-              <div className="animate-fade-in-up" style={{animationDelay: '0.45s'}}>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.45s' }}>
                 <Input
                   type="password"
                   name="confirmPassword"
@@ -166,14 +171,14 @@ export const ResetPassword = () => {
                 />
               </div>
 
-              <div className="animate-fade-in-up" style={{animationDelay: '0.5s', animationFillMode: 'both'}}>
+              <div className="animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                 <Button type="submit" isLoading={isLoading} className="w-full py-3 text-base font-semibold hover-lift">
                   Reset Password
                 </Button>
               </div>
             </form>
 
-            <p className="text-center text-base text-primary-700 mt-8 animate-fade-in-up" style={{animationDelay: '0.55s'}}>
+            <p className="text-center text-base text-primary-700 mt-8 animate-fade-in-up" style={{ animationDelay: '0.55s' }}>
               <Link to="/login" className="text-accent-600 hover:text-accent-700 font-semibold transition-colors">
                 ← Back to login
               </Link>

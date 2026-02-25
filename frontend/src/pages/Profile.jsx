@@ -113,6 +113,21 @@ export const Profile = () => {
       return;
     }
 
+    if (!/[A-Z]/.test(passwordForm.newPassword)) {
+      addToast('Password must contain at least one uppercase letter', 'error');
+      return;
+    }
+
+    if (!/[a-z]/.test(passwordForm.newPassword)) {
+      addToast('Password must contain at least one lowercase letter', 'error');
+      return;
+    }
+
+    if (!/[0-9]/.test(passwordForm.newPassword)) {
+      addToast('Password must contain at least one number', 'error');
+      return;
+    }
+
     setIsUpdating(true);
 
     try {
@@ -150,8 +165,8 @@ export const Profile = () => {
   return (
     <div className="min-h-screen bg-primary-50 flex flex-col">
       <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
       <header className="bg-white/80 backdrop-blur-md border-b border-primary-100 px-4 sm:px-6 py-4">
@@ -181,7 +196,7 @@ export const Profile = () => {
             <p className="text-base sm:text-lg text-primary-600">Manage your account details and security settings</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 mb-12 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 mb-12 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <h3 className="text-2xl font-bold text-primary-900 mb-6">Profile Information</h3>
 
             <form onSubmit={handleProfileUpdate} className="space-y-4 mb-8">
@@ -287,7 +302,7 @@ export const Profile = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <h3 className="text-2xl font-bold text-primary-900 mb-6">Security Settings</h3>
 
             <div className="space-y-4">

@@ -10,6 +10,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
+  const [activity, setActivity] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [mathQuestion, setMathQuestion] = useState(() => ({ text: '', answer: 0 }));
   const [mathAnswer, setMathAnswer] = useState('');
@@ -30,11 +31,15 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndActivity = async () => {
       try {
-        const response = await userAPI.getMe();
-        const userData = response.data.data.user;
-        setUser(userData);
+        const [userResponse, activityResponse] = await Promise.all([
+          userAPI.getMe(),
+          userAPI.getActivity()
+        ]);
+
+        setUser(userResponse.data.data.user);
+        setActivity(activityResponse.data.data.activity);
       } catch (error) {
         navigate('/login');
       } finally {
@@ -42,7 +47,7 @@ export const Dashboard = () => {
       }
     };
 
-    fetchUser();
+    fetchUserAndActivity();
   }, [navigate]);
 
   useEffect(() => {
@@ -133,8 +138,8 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '0s'}} />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '2s'}} />
+        <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Header */}
@@ -163,56 +168,63 @@ export const Dashboard = () => {
         <div className="max-w-4xl mx-auto">
           {/* Welcome Section */}
           <div className="mb-12 animate-fade-in-up">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-900 mb-2">Welcome Back, {displayName()}!</h2>
-            <p className="text-base sm:text-lg lg:text-xl text-primary-600">Your account is secure and ready to use</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-2">
+              <img
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName())}&backgroundColor=4F46E5&textColor=ffffff`}
+                alt="Profile Avatar"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-md border-2 border-white ring-4 ring-primary-50 object-cover"
+              />
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-900">
+                Welcome Back, {displayName()}!
+              </h2>
+            </div>
+            <p className="text-base sm:text-lg lg:text-xl text-primary-600 sm:ml-28">Your account is secure and ready to use</p>
           </div>
 
           {/* Account Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {/* Email Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-primary-900">Email</h3>
               </div>
               <p className="text-sm text-primary-600">{user?.email}</p>
               <div className="mt-4 pt-4 border-t border-primary-100">
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                  user?.isEmailConfirmed
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-yellow-50 text-yellow-700'
-                }`}>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user?.isEmailConfirmed
+                  ? 'bg-green-50 text-green-700'
+                  : 'bg-yellow-50 text-yellow-700'
+                  }`}>
                   {user?.isEmailConfirmed ? 'Verified' : 'Pending Verification'}
                 </span>
               </div>
             </div>
 
             {/* 2FA Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-primary-900">Security</h3>
               </div>
               <p className="text-sm text-primary-600">Two-Factor Authentication</p>
               <div className="mt-4 pt-4 border-t border-primary-100">
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                  user?.twoFactorEnabled
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-primary-100 text-primary-700'
-                }`}>
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${user?.twoFactorEnabled
+                  ? 'bg-green-50 text-green-700'
+                  : 'bg-primary-100 text-primary-700'
+                  }`}>
                   {user?.twoFactorEnabled ? 'Enabled' : 'Not Enabled'}
                 </span>
               </div>
             </div>
 
             {/* Account Age Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-primary-900">Member</h3>
               </div>
               <p className="text-sm text-primary-600">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
+                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
                 }) : 'N/A'}
               </p>
               <div className="mt-4 pt-4 border-t border-primary-100">
@@ -221,7 +233,7 @@ export const Dashboard = () => {
             </div>
 
             {/* Status Card */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-primary-100 hover-lift animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-primary-900">Status</h3>
               </div>
@@ -235,7 +247,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Math Game */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{animationDelay: '0.5s'}}>
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-primary-900">Quick Math Game</h3>
@@ -267,6 +279,39 @@ export const Dashboard = () => {
                 <p className="text-sm text-primary-700">{mathFeedback}</p>
               )}
             </form>
+          </div>
+
+          {/* Recent Security Activity */}
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div>
+                <h3 className="text-2xl font-bold text-primary-900">Recent Security Activity</h3>
+                <p className="text-primary-600">Review your latest account interactions</p>
+              </div>
+            </div>
+
+            {activity.length > 0 ? (
+              <div className="divide-y divide-primary-100 max-h-96 overflow-y-auto pr-2">
+                {activity.map((log) => (
+                  <div key={log._id || log.timestamp} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-primary-50 px-2 rounded-lg transition-colors">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-primary-900 text-sm">{log.action.replace(/_/g, ' ')}</span>
+                      <span className="text-xs text-primary-500 font-mono mt-1">{log.ip || 'Unknown IP'}</span>
+                    </div>
+                    <div className="text-xs text-primary-600 sm:text-right">
+                      {new Date(log.timestamp).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric',
+                        hour: 'numeric', minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-primary-50 rounded-xl border border-primary-100">
+                <p className="text-primary-600">No recent security activity found.</p>
+              </div>
+            )}
           </div>
 
         </div>

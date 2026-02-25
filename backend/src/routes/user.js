@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import AuditLog from '../models/AuditLog.js';
 import { authenticate, require2FAComplete } from '../middleware/auth.js';
 import { createAuditLog } from '../services/auditService.js';
 import { validateEmail, validatePassword } from '../utils/validators.js';
@@ -42,14 +43,36 @@ router.get('/me', authenticate, require2FAComplete, async (req, res, next) => {
 });
 
 // =====================================================
+// GET /users/activity - Get recent account activity
+// =====================================================
+router.get('/activity', authenticate, require2FAComplete, async (req, res, next) => {
+  try {
+    const logs = await AuditLog.find({ userId: req.user.id })
+      .sort({ timestamp: -1 })
+      .limit(10)
+      .select('action ip userAgent timestamp metadata')
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        activity: logs,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =====================================================
 // PUT /users/me - Update current user profile
 // =====================================================
 router.put('/me', authenticate, require2FAComplete, async (req, res, next) => {
   try {
     const { name, email, currentPassword, newPassword } = req.body;
-    
+
     const user = await User.findById(req.user.id).select('+passwordHash');
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -76,7 +99,7 @@ router.put('/me', authenticate, require2FAComplete, async (req, res, next) => {
     // Update email if provided
     if (email !== undefined && email !== user.email) {
       validateEmail(email);
-      
+
       // Check if email is already taken
       const existingUser = await User.findOne({ email });
       if (existingUser) {
