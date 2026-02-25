@@ -12,6 +12,7 @@ export const Profile = () => {
   const { addToast } = useToast();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
@@ -56,12 +57,9 @@ export const Profile = () => {
     fetchUser();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    const shouldLogout = window.confirm('Are you sure you want to sign out?');
-    if (!shouldLogout) {
-      return;
-    }
+  const handleLogoutClick = () => setShowLogoutModal(true);
 
+  const confirmLogout = async () => {
     try {
       await authAPI.logout();
       addToast('Logged out successfully', 'success');
@@ -69,6 +67,8 @@ export const Profile = () => {
     } catch (error) {
       console.error('Logout error:', error);
       addToast('Error logging out', 'error');
+    } finally {
+      setShowLogoutModal(false);
     }
   };
 
@@ -180,7 +180,7 @@ export const Profile = () => {
               Settings
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="px-4 py-2 rounded-lg text-primary-700 hover:bg-primary-100 transition-colors font-medium"
             >
               Sign Out
@@ -333,6 +333,24 @@ export const Profile = () => {
           </div>
         </div>
       </main>
+
+      {/* Logout Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-xl border border-primary-100 animate-scale-in text-center">
+            <h3 className="text-2xl font-bold text-primary-900 mb-2">Sign Out?</h3>
+            <p className="text-primary-600 mb-8">Are you sure you want to sign out of your account?</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => setShowLogoutModal(false)} variant="secondary" className="w-full sm:w-auto">
+                Cancel
+              </Button>
+              <button onClick={confirmLogout} className="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors">
+                Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

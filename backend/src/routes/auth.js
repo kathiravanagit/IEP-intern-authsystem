@@ -255,7 +255,7 @@ router.get('/confirm-login', async (req, res, next) => {
         metadata: { reason: 'Invalid or expired confirmation token' },
       });
 
-      return res.status(401).json({
+      return res.status(400).json({
         success: false,
         message: 'Invalid or expired confirmation link',
       });
@@ -369,7 +369,7 @@ router.post('/verify-2fa', authenticate, authLimiter, async (req, res, next) => 
         user.twoFactorBackupCodes,
         backupCode
       );
-      
+
       if (codeIndex !== -1) {
         verified = true;
         user.twoFactorBackupCodes.splice(codeIndex, 1);
@@ -472,7 +472,7 @@ router.post('/google-login', authLimiter, async (req, res, next) => {
     }
 
     let user = await User.findOne({ email }).select('+passwordHash +twoFactorEnabled');
-    
+
     if (!user) {
       user = await User.create({
         email,

@@ -4,6 +4,8 @@ import { authAPI } from '../services/api';
 import { Button } from '../components/ui/Button';
 import { APP_NAME } from '../constants';
 
+const processedTokens = new Set();
+
 export const ConfirmLogin = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -14,9 +16,6 @@ export const ConfirmLogin = () => {
 
   useEffect(() => {
     const confirmLogin = async () => {
-      if (isProcessInitiated.current) return;
-      isProcessInitiated.current = true;
-
       const token = searchParams.get('token');
 
       if (!token) {
@@ -24,6 +23,9 @@ export const ConfirmLogin = () => {
         setMessage('Invalid or missing token');
         return;
       }
+
+      if (processedTokens.has(token)) return;
+      processedTokens.add(token);
 
       try {
         const response = await authAPI.confirmLogin(token);
