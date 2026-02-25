@@ -451,26 +451,85 @@ router.post('/google-login', authLimiter, async (req, res, next) => {
       });
     }
 
-    // Note: In production, verify the token with Google's API
-    // For now, this is a placeholder that expects the frontend to send a valid token
-    // You'll need to implement proper token verification using:
-    // import { OAuth2Client } from 'google-auth-library';
-    // const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-    // const ticket = await client.verifyIdToken({ idToken: token });
-
-    // Placeholder: Extract email from token (in production, verify with Google)
-    // For now, return a message asking to implement Google verification
-    
-    await createAuditLog({
-      action: 'GOOGLE_LOGIN_ATTEMPT',
-      ip: req.ip,
-      userAgent: req.get('user-agent'),
+    const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${token}` }
     });
 
-    return res.status(501).json({
-      success: false,
-      message: 'Google login is not yet fully configured. Please implement Google token verification in the backend using google-auth-library.',
-      details: 'Install: npm install google-auth-library and configure GOOGLE_CLIENT_ID in .env'
+    if (!googleRes.ok) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Google token'
+      });
+    }
+
+    const { email, name, email_verified } = await googleRes.json();
+
+    if (!email_verified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google email is not verified',
+      });
+    }
+
+    let user = await User.findOne({ email }).select('+passwordHash +twoFactorEnabled');
+    
+    if (!user) {
+      user = await User.create({
+        email,
+        name,
+        passwordHash: generateToken(),
+        isVerified: true,
+        isEmailConfirmed: true
+      });
+    }
+
+    if (user.twoFactorEnabled) {
+      sendTokenResponse(user, res, true);
+
+      await createAuditLog({
+        userId: user._id,
+        action: 'LOGIN_ATTEMPT',
+        email: user.email,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+        metadata: { method: 'google', twoFactorRequired: true },
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: 'Please enter your 2FA code.',
+        requires2FA: true,
+        data: {
+          user: {
+            id: user._id,
+            email: user.email,
+            name: user.name,
+          },
+        },
+      });
+    }
+
+    sendTokenResponse(user, res, false);
+
+    await createAuditLog({
+      userId: user._id,
+      action: 'LOGIN_SUCCESS',
+      email: user.email,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+      metadata: { method: 'google' }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google login successful',
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+        },
+      },
     });
 
   } catch (error) {

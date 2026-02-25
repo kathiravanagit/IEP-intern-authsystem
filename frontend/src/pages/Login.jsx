@@ -56,6 +56,13 @@ export const Login = () => {
           text: 'Please enter your 2FA code',
         });
         addToast('Please enter your 2FA code', 'info');
+      } else if (!response.data.data?.user) {
+        // Email not confirmed case (backend returns 200 with confirmation message)
+        setMessage({
+          type: 'info',
+          text: response.data.message,
+        });
+        addToast(response.data.message, 'info');
       } else {
         setMessage({
           type: 'success',
@@ -90,7 +97,8 @@ export const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await authAPI.verify2FA({ token: twoFACode });
+      const payload = twoFACode.length >= 8 ? { backupCode: twoFACode } : { token: twoFACode };
+      const response = await authAPI.verify2FA(payload);
 
       setMessage({
         type: 'success',
@@ -290,10 +298,10 @@ export const Login = () => {
                     type="text"
                     value={twoFACode}
                     onChange={(e) => setTwoFACode(e.target.value.replace(/\s/g, '').toUpperCase())}
-                    placeholder="000000"
-                    maxLength="6"
+                    placeholder="000000 or Backup Code"
+                    maxLength="8"
                     autoFocus
-                    label="2FA Verification Code"
+                    label="2FA Verification Code or Backup Code"
                   />
 
                   <Button type="submit" isLoading={isLoading} className="w-full py-3 text-base font-semibold mt-6 hover-lift">
