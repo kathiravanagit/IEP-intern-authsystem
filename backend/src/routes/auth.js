@@ -78,6 +78,19 @@ router.post('/register', authLimiter, async (req, res, next) => {
     validateEmail(email);
     validatePassword(password);
 
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email is already registered. Please log in.',
+        });
+      } else {
+        // Delete the unverified "ghost" document so they can try to register properly again
+        await User.deleteOne({ _id: existingUser._id });
+      }
+    }
+
     const user = await User.create({
       email,
       name: name.trim(),
