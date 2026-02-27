@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import crypto from 'crypto';
 import { authenticate, require2FAComplete } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
 import { createAuditLog } from '../services/auditService.js';
@@ -19,28 +20,43 @@ import {
 const router = express.Router();
 
 // Helper: Create JWT Token
-const createJWTToken = (userId, twoFactorPending = false) => {
+const createJWTToken = (userId, twoFactorPending = false, sessionId = null, rememberMe = false) => {
+  const expiresIn = rememberMe ? '30d' : process.env.JWT_EXPIRES_IN;
   return jwt.sign(
-    { id: userId, twoFactorPending },
+    { id: userId, twoFactorPending, sessionId },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
+    { expiresIn }
   );
 };
 
 // Helper: Send JWT Cookie
-const sendTokenResponse = (user, res, twoFactorPending = false) => {
-  const token = createJWTToken(user._id, twoFactorPending);
+const sendTokenResponse = async (user, req, res, twoFactorPending = false, rememberMe = false) => {
+  const sessionId = crypto.randomBytes(16).toString('hex');
+  const token = createJWTToken(user._id, twoFactorPending, sessionId, rememberMe);
 
   const cookieOptions = {
-    expires: new Date(
-      Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRES_IN) * 60 * 1000
-    ),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
   };
 
+  if (rememberMe) {
+    cookieOptions.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  }
+
   res.cookie('jwt', token, cookieOptions);
+
+  // Track session in database
+  const sessionData = {
+    sessionId,
+    userAgent: req.headers['user-agent'] || 'Unknown',
+    ip: req.ip || 'Unknown',
+    lastActive: new Date(),
+  };
+
+  await User.findByIdAndUpdate(user._id, {
+    $push: { activeSessions: sessionData }
+  });
 
   return token;
 };
@@ -111,9 +127,10 @@ router.post('/register', authLimiter, async (req, res, next) => {
 // =====================================================
 // POST /auth/login - Login (sends confirmation email)
 // =====================================================
+// =====================================================
 router.post('/login', authLimiter, async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, rememberMe } = req.body;
 
     validateEmail(email);
 
@@ -147,7 +164,7 @@ router.post('/login', authLimiter, async (req, res, next) => {
       // Check if 2FA is enabled
       if (user.twoFactorEnabled) {
         // Set JWT with 2FA pending flag
-        sendTokenResponse(user, res, true);
+        await sendTokenResponse(user, req, res, true, rememberMe);
 
         await createAuditLog({
           userId: user._id,
@@ -173,7 +190,7 @@ router.post('/login', authLimiter, async (req, res, next) => {
       }
 
       // No 2FA - complete login
-      sendTokenResponse(user, res, false);
+      await sendTokenResponse(user, req, res, false, rememberMe);
 
       await createAuditLog({
         userId: user._id,
@@ -279,7 +296,7 @@ router.get('/confirm-login', async (req, res, next) => {
     // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
       // Set JWT with 2FA pending flag
-      sendTokenResponse(user, res, true);
+      await sendTokenResponse(user, req, res, true);
 
       await createAuditLog({
         userId: user._id,
@@ -305,7 +322,7 @@ router.get('/confirm-login', async (req, res, next) => {
     }
 
     // No 2FA - complete login
-    sendTokenResponse(user, res, false);
+    await sendTokenResponse(user, req, res, false);
 
     await createAuditLog({
       userId: user._id,
@@ -402,7 +419,7 @@ router.post('/verify-2fa', authenticate, authLimiter, async (req, res, next) => 
     }
 
     // Issue final JWT without 2FA pending flag
-    sendTokenResponse(user, res, false);
+    await sendTokenResponse(user, req, res, false);
 
     await createAuditLog({
       userId: user._id,
@@ -442,7 +459,7 @@ router.post('/verify-2fa', authenticate, authLimiter, async (req, res, next) => 
 // =====================================================
 router.post('/google-login', authLimiter, async (req, res, next) => {
   try {
-    const { token } = req.body;
+    const { token, rememberMe } = req.body;
 
     if (!token) {
       return res.status(400).json({
@@ -484,7 +501,7 @@ router.post('/google-login', authLimiter, async (req, res, next) => {
     }
 
     if (user.twoFactorEnabled) {
-      sendTokenResponse(user, res, true);
+      await sendTokenResponse(user, req, res, true, rememberMe);
 
       await createAuditLog({
         userId: user._id,
@@ -509,7 +526,7 @@ router.post('/google-login', authLimiter, async (req, res, next) => {
       });
     }
 
-    sendTokenResponse(user, res, false);
+    await sendTokenResponse(user, req, res, false, rememberMe);
 
     await createAuditLog({
       userId: user._id,
@@ -798,7 +815,15 @@ router.post('/logout', async (req, res, next) => {
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+
+        // Remove current session from User
+        if (decoded.id && decoded.sessionId) {
+          await User.findByIdAndUpdate(decoded.id, {
+            $pull: { activeSessions: { sessionId: decoded.sessionId } }
+          });
+        }
+
         await createAuditLog({
           userId: decoded.id,
           action: 'LOGOUT',

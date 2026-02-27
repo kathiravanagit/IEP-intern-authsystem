@@ -164,4 +164,108 @@ router.put('/me', authenticate, require2FAComplete, async (req, res, next) => {
   }
 });
 
+// =====================================================
+// GET /users/sessions - Get all active sessions
+// =====================================================
+router.get('/sessions', authenticate, require2FAComplete, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('+activeSessions').lean();
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Sort activeSessions by date, so newest is first
+    const sessions = user.activeSessions || [];
+    sessions.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        sessions,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =====================================================
+// DELETE /users/sessions/:id - Revoke a specific session
+// =====================================================
+router.delete('/sessions/:id', authenticate, require2FAComplete, async (req, res, next) => {
+  try {
+    const { id: sessionIdToRemove } = req.params;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $pull: { activeSessions: { sessionId: sessionIdToRemove } } },
+      { new: true }
+    ).select('+activeSessions');
+
+    await createAuditLog({
+      userId: user._id,
+      action: 'SESSION_REVOKED',
+      email: user.email,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+      metadata: { revokedSessionId: sessionIdToRemove },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Session revoked successfully',
+      data: {
+        sessions: user.activeSessions,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// =====================================================
+// DELETE /users/me - Danger Zone: Delete Account
+// =====================================================
+router.delete('/me', authenticate, require2FAComplete, async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ success: false, message: 'Password is required to delete account' });
+    }
+
+    const user = await User.findById(req.user.id).select('+passwordHash');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: 'Incorrect password' });
+    }
+
+    const emailBeforeDelete = user.email;
+
+    await User.findByIdAndDelete(req.user.id);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'ACCOUNT_DELETED',
+      email: emailBeforeDelete,
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+
+    // Clear JWT cookie
+    res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your account and all associated data have been permanently deleted.',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

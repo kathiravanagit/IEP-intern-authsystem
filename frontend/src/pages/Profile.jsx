@@ -24,6 +24,10 @@ export const Profile = () => {
     confirmPassword: '',
   });
 
+  const [sessions, setSessions] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+
   // Session timeout - 30 minutes of inactivity
   useSessionTimeout(30);
 
@@ -47,6 +51,13 @@ export const Profile = () => {
           name: userData.name || '',
           email: userData.email || '',
         });
+
+        try {
+          const sessionsRes = await userAPI.getSessions();
+          setSessions(sessionsRes.data.data.sessions);
+        } catch (err) {
+          // Ignore session fetch errors
+        }
       } catch (error) {
         navigate('/login');
       } finally {
@@ -148,6 +159,36 @@ export const Profile = () => {
       addToast(message, 'error');
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId) => {
+    try {
+      await userAPI.revokeSession(sessionId);
+      setSessions(sessions.filter(s => s.sessionId !== sessionId));
+      addToast('Device signed out successfully', 'success');
+    } catch (error) {
+      addToast('Failed to sign out device', 'error');
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    if (!deletePassword) {
+      addToast('Password is required', 'error');
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await userAPI.deleteAccount({ password: deletePassword });
+      addToast('Account permanently deleted', 'success');
+      navigate('/register');
+    } catch (error) {
+      addToast(error.response?.data?.message || 'Failed to delete account', 'error');
+      setIsUpdating(false);
+      setShowDeleteModal(false);
+      setDeletePassword('');
     }
   };
 
@@ -331,6 +372,48 @@ export const Profile = () => {
               )}
             </div>
           </div>
+
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-primary-100 mb-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <h3 className="text-2xl font-bold text-primary-900 mb-6">Active Devices</h3>
+            <div className="space-y-3">
+              {sessions.map((session, index) => (
+                <div key={session._id || index} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-primary-100 rounded-xl hover:bg-primary-50 transition-colors">
+                  <div>
+                    <p className="font-medium text-primary-900">{session.userAgent.substring(0, 40)}{session.userAgent.length > 40 ? '...' : ''}</p>
+                    <p className="text-sm text-primary-500 mt-1">
+                      Last active: {new Date(session.lastActive).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {index === 0 ? (
+                    <span className="mt-3 sm:mt-0 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full w-max">
+                      Current Session
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleRevokeSession(session.sessionId)}
+                      className="mt-3 sm:mt-0 text-sm font-medium text-red-600 hover:text-red-800 transition-colors w-max"
+                    >
+                      Sign Out
+                    </button>
+                  )}
+                </div>
+              ))}
+              {sessions.length === 0 && (
+                <p className="text-primary-600">No active sessions found.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-red-50 rounded-2xl p-8 border border-red-200 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+            <h3 className="text-2xl font-bold text-red-900 mb-2">Danger Zone</h3>
+            <p className="text-red-700 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="px-6 py-2.5 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors"
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
       </main>
 
@@ -348,6 +431,37 @@ export const Profile = () => {
                 Yes, Sign Out
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-xl border border-red-100 animate-scale-in">
+            <h3 className="text-2xl font-bold text-red-600 mb-2 text-center">Delete Account?</h3>
+            <p className="text-primary-600 mb-6 text-center">
+              This action is permanent. Enter your password to confirm deletion.
+            </p>
+            <form onSubmit={handleDeleteAccount}>
+              <div className="mb-6">
+                <Input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button type="button" onClick={() => { setShowDeleteModal(false); setDeletePassword(''); }} variant="secondary" className="w-full sm:w-auto">
+                  Cancel
+                </Button>
+                <button type="submit" disabled={isUpdating} className="w-full sm:w-auto px-6 py-2.5 rounded-lg font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50">
+                  {isUpdating ? 'Deleting...' : 'Delete Permanently'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

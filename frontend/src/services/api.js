@@ -42,6 +42,9 @@ export const authAPI = {
 export const userAPI = {
   getMe: () => api.get('/users/me'),
   updateMe: (data) => api.put('/users/me', data),
+  getSessions: () => api.get('/users/sessions'),
+  revokeSession: (id) => api.delete(`/users/sessions/${id}`),
+  deleteAccount: (data) => api.delete('/users/me', { data }),
 };
 
 export default api;

@@ -2,6 +2,13 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
 
+const sessionSchema = new mongoose.Schema({
+  sessionId: { type: String, required: true },
+  userAgent: { type: String, required: true },
+  ip: { type: String, required: true },
+  lastActive: { type: Date, default: Date.now },
+});
+
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -66,6 +73,11 @@ const userSchema = new mongoose.Schema(
     twoFactorVerified: {
       type: Boolean,
       default: false,
+    },
+    // Track active sessions for "Sign out of other devices"
+    activeSessions: {
+      type: [sessionSchema],
+      select: false,
     },
   },
   {

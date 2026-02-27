@@ -14,13 +14,26 @@ export const authenticate = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select('+activeSessions');
 
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'User no longer exists.',
       });
+    }
+
+    // Verify session still exists (wasn't revoked remotely)
+    if (decoded.sessionId) {
+      const activeSession = user.activeSessions?.find(s => s.sessionId === decoded.sessionId);
+      if (!activeSession) {
+        return res.status(401).json({
+          success: false,
+          message: 'Session has been revoked or expired. Please log in again.',
+        });
+      }
+
+      // Optional: update lastActive timestamp (debounce to avoid saving every single request)
     }
 
     req.user = {

@@ -11,7 +11,7 @@ export const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { addToast } = useToast();
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
   const [twoFACode, setTwoFACode] = useState('');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,8 @@ export const Login = () => {
   }, [location]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
     setErrors({ ...errors, [e.target.name]: '' });
   };
 
@@ -126,6 +127,7 @@ export const Login = () => {
       try {
         const response = await authAPI.googleLogin({
           token: codeResponse.access_token,
+          rememberMe: formData.rememberMe,
         });
 
         setMessage({
@@ -156,8 +158,8 @@ export const Login = () => {
     <div className="min-h-screen bg-primary-50 flex flex-col">
       {/* Animated Background */}
       <div className="fixed inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '1s'}} />
-        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{animationDelay: '3s'}} />
+        <div className="absolute top-0 right-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-0 left-0 w-72 h-72 sm:w-96 sm:h-96 bg-accent-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style={{ animationDelay: '3s' }} />
       </div>
 
       {/* Header */}
@@ -180,22 +182,21 @@ export const Login = () => {
         <div className="max-w-md w-full animate-fade-in-up">
           {/* Login Card */}
           <div className="bg-white rounded-2xl p-8 lg:p-10 shadow-sm border border-primary-100 hover-lift">
-            <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+            <h2 className="text-3xl sm:text-4xl font-bold text-primary-900 mb-2 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               {requires2FA ? 'Verify Your Identity' : 'Welcome Back'}
             </h2>
-            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+            <p className="text-base sm:text-lg text-primary-600 mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               {requires2FA ? 'Enter the code from your authenticator app' : 'Sign in to your account to continue'}
             </p>
 
             {message.text && (
               <div
-                className={`mb-6 p-4 rounded-lg animate-fade-in ${
-                  message.type === 'success'
-                    ? 'bg-green-50 text-green-800 border border-green-200'
-                    : message.type === 'info'
+                className={`mb-6 p-4 rounded-lg animate-fade-in ${message.type === 'success'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : message.type === 'info'
                     ? 'bg-blue-50 text-blue-800 border border-blue-200'
                     : 'bg-red-50 text-red-800 border border-red-200'
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-2">
                   {message.type === 'info' && (
@@ -211,7 +212,7 @@ export const Login = () => {
             <form onSubmit={requires2FA ? handle2FASubmit : handleSubmit} className="space-y-6">
               {!requires2FA ? (
                 <>
-                  <div className="animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+                  <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                     <Input
                       type="email"
                       name="email"
@@ -224,7 +225,7 @@ export const Login = () => {
                     />
                   </div>
 
-                  <div className="animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+                  <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-primary-700">Password</label>
                       <Link
@@ -246,14 +247,28 @@ export const Login = () => {
                     />
                   </div>
 
-                  <div className="animate-fade-in-up" style={{animationDelay: '0.5s', animationFillMode: 'both'}}>
+                  <div className="flex items-center gap-2 animate-fade-in-up" style={{ animationDelay: '0.45s' }}>
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      name="rememberMe"
+                      checked={formData.rememberMe}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-accent-600 border-gray-300 rounded focus:ring-accent-500"
+                    />
+                    <label htmlFor="rememberMe" className="text-sm text-primary-700">
+                      Remember me for 30 days
+                    </label>
+                  </div>
+
+                  <div className="animate-fade-in-up" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
                     <Button type="submit" isLoading={isLoading} className="w-full py-3 text-base font-semibold hover-lift">
                       Sign In
                     </Button>
                   </div>
 
                   {/* Divider */}
-                  <div className="relative animate-fade-in-up" style={{animationDelay: '0.55s'}}>
+                  <div className="relative animate-fade-in-up" style={{ animationDelay: '0.55s' }}>
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-primary-200"></div>
                     </div>
@@ -263,7 +278,7 @@ export const Login = () => {
                   </div>
 
                   {/* Google Login Button */}
-                  <div className="animate-fade-in-up" style={{animationDelay: '0.6s', animationFillMode: 'both'}}>
+                  <div className="animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
                     <button
                       type="button"
                       onClick={() => googleLogin()}
@@ -313,7 +328,7 @@ export const Login = () => {
                     onClick={() => {
                       setRequires2FA(false);
                       setTwoFACode('');
-                      setFormData({ email: '', password: '' });
+                      setFormData({ email: '', password: '', rememberMe: false });
                       setMessage({ type: '', text: '' });
                     }}
                     className="w-full mt-3 py-2 text-base text-accent-600 hover:text-accent-700 font-medium transition-colors"
@@ -324,7 +339,7 @@ export const Login = () => {
               )}
             </form>
 
-            <p className="text-center text-base text-primary-700 mt-8 animate-fade-in-up" style={{animationDelay: '0.65s'}}>
+            <p className="text-center text-base text-primary-700 mt-8 animate-fade-in-up" style={{ animationDelay: '0.65s' }}>
               {!requires2FA && (
                 <>
                   Don't have an account?{' '}
@@ -337,7 +352,7 @@ export const Login = () => {
           </div>
 
           {/* Security Info */}
-          <div className="mt-8 text-center animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+          <div className="mt-8 text-center animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <p className="text-sm text-primary-600">
               Your data is encrypted and secure
             </p>
