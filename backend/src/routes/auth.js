@@ -21,7 +21,7 @@ const router = express.Router();
 
 // Helper: Create JWT Token
 const createJWTToken = (userId, twoFactorPending = false, sessionId = null, rememberMe = false) => {
-  const expiresIn = rememberMe ? '30d' : process.env.JWT_EXPIRES_IN;
+  const expiresIn = rememberMe ? '30d' : (process.env.JWT_EXPIRES_IN || '7d');
   return jwt.sign(
     { id: userId, twoFactorPending, sessionId },
     process.env.JWT_SECRET,
