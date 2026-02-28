@@ -34,10 +34,11 @@ const sendTokenResponse = async (user, req, res, twoFactorPending = false, remem
   const sessionId = crypto.randomBytes(16).toString('hex');
   const token = createJWTToken(user._id, twoFactorPending, sessionId, rememberMe);
 
+  const isProduction = process.env.NODE_ENV === 'production';
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   };
 
   if (rememberMe) {
@@ -851,6 +852,8 @@ router.post('/logout', async (req, res, next) => {
     res.cookie('jwt', '', {
       httpOnly: true,
       expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     res.status(200).json({

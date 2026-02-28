@@ -257,7 +257,12 @@ router.delete('/me', authenticate, require2FAComplete, async (req, res, next) =>
     });
 
     // Clear JWT cookie
-    res.cookie('jwt', '', { httpOnly: true, expires: new Date(0) });
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
 
     return res.status(200).json({
       success: true,
